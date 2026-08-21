@@ -277,7 +277,12 @@ def add_booking():
 
     bookingID = input("Enter Booking ID: ")
     custID = input("Enter Customer ID: ")
-    room_no = int(input("Enter Room Number: "))
+    while True:
+        try:
+            room_no = int(input("Enter Room Number: "))
+            break
+        except ValueError:
+            print("Invalid input. Please enter a valid room number.")
     type_room = input("Enter Room Type: ")
 
     # Get dates
@@ -300,9 +305,24 @@ def add_booking():
         db.close()
         return
 
-    # Get remaining inputs
-    noofguest = int(input("Enter Number of Guests: "))
-    amtpernight = float(input("Enter Amount per Night: "))
+    while True:
+        try:
+            noofguest = int(input("Enter Number of Guests: "))
+            if noofguest <= 0:
+                print("Number of guests must be a positive integer.")
+                continue
+            break
+        except ValueError:
+            print("Invalid input. Please enter a valid number of guests.")
+    while True:
+        try:
+            amtpernight = float(input("Enter Amount per Night: "))
+            if amtpernight <= 0:
+                print("Amount per night must be a positive number.")
+                continue
+            break
+        except ValueError:
+            print("Invalid input. Please enter a valid amount per night.")
 
     # Calculate total automatically
     nights = (checkout_obj - checkin_obj).days
