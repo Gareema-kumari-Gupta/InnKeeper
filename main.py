@@ -24,6 +24,31 @@ def authenticate_user():
     print("Too many failed attempts. Exiting the program.")
     return False
 
+# --------------------------------- DASHBOARD ----------------------------
+
+def dashboard():
+    db = connect_db()
+    cursor = db.cursor()
+
+    # Total Guests
+    cursor.execute("SELECT COUNT(*) FROM guest")
+    total_guests = cursor.fetchone()[0]
+
+    # Total Bookings
+    cursor.execute("SELECT COUNT(*) FROM booking")
+    total_bookings = cursor.fetchone()[0]
+
+    # Total Payments
+    cursor.execute("SELECT COUNT(*) FROM payment")
+    total_payments = cursor.fetchone()[0]
+
+    print("\n--- Dashboard ---")
+    print(f"Total Guests: {total_guests}")
+    print(f"Total Bookings: {total_bookings}")
+    print(f"Total Payments: {total_payments}")
+
+    cursor.close()
+    db.close()
 
 # ---------------- GUEST MANAGEMENT ----------------
 
@@ -496,7 +521,8 @@ def main_menu():
         print("1. Guest Management")
         print("2. Booking Management")
         print("3. Payment Management")
-        print("4. Exit")
+        print("4. Dashboard")
+        print("5. Exit")
 
         choice = input("Enter your choice: ")
 
@@ -507,6 +533,8 @@ def main_menu():
         elif choice == '3':
             payment_management()
         elif choice == '4':
+            dashboard()
+        elif choice == '5':
             print("Exiting the system. Goodbye!")
             break
         else:
