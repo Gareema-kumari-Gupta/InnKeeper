@@ -273,6 +273,8 @@ def add_booking():
     db = connect_db()
     cursor = db.cursor()
 
+    print("\n--- Adding Booking ---")
+
     bookingID = input("Enter Booking ID: ")
     custID = input("Enter Customer ID: ")
     room_no = int(input("Enter Room Number: "))
@@ -318,7 +320,8 @@ def add_booking():
     cursor.execute(query, data)
     db.commit()
 
-    print("Booking record added successfully!")
+    print('''
+    Booking record added successfully!''')
 
     cursor.close()
     db.close()
@@ -401,6 +404,7 @@ def delete_booking():
     db = connect_db()
     cursor = db.cursor()
 
+    print("\n--- Deleting Booking ---")
     bookingID = input("Enter Booking ID to delete: ")
 
     query_check = "SELECT * FROM booking WHERE bookingID = ?"
@@ -581,7 +585,7 @@ def delete_payment():
 
 def main_menu():
     while True:
-        print("\n--- Hotel Management System ---")
+        print("\n--- InnKeeper ---")
         print("1. Guest Management")
         print("2. Booking Management")
         print("3. Payment Management")
