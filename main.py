@@ -1,4 +1,6 @@
 import sqlite3
+from datetime import datetime
+
 
 # Predefined User ID and Password
 AUTHORIZED_USER = "admin"
@@ -16,12 +18,15 @@ def authenticate_user():
         password = input("Enter Password: ")
 
         if user_id == AUTHORIZED_USER and password == AUTHORIZED_PASSWORD:
-            print("Authentication Successful! Welcome to the Hotel Management System.")
+            print('''
+            Authentication Successful! Welcome to the Hotel Management System.''')
             return True
         else:
-            print(f"Authentication Failed! You have {2 - attempt} attempt(s) remaining.")
+            print(f'''
+            Authentication Failed! You have {2 - attempt} attempt(s) remaining.''')
 
-    print("Too many failed attempts. Exiting the program.")
+    print('''
+    Too many failed attempts. Exiting the program.''')
     return False
 
 # --------------------------------- DASHBOARD ----------------------------
@@ -61,7 +66,8 @@ def guest_management():
         print("4. Delete Guest")
         print("5. Back to Main Menu")
 
-        choice = input("Enter your choice: ")
+        choice = input('''
+        Enter your choice: ''')
 
         if choice == '1':
             add_guest()
@@ -74,7 +80,8 @@ def guest_management():
         elif choice == '5':
             break
         else:
-            print("Invalid choice! Please try again.")
+            print('''
+            Invalid choice! Please try again.''')
 
 
 def add_guest():
@@ -82,7 +89,8 @@ def add_guest():
     cursor = db.cursor()
 
     while True:
-        custID = input("Enter Customer ID: ")
+        custID = input('''
+        Enter Customer ID: ''')
         first_name = input("Enter First Name: ")
         last_name = input("Enter Last Name: ")
         while True:
@@ -114,7 +122,8 @@ def add_guest():
         cursor.execute(query, data)
         db.commit()
 
-        print("Guest record added successfully!")
+        print('''
+        Guest record added successfully!''')
 
         add_more = input("Do you want to add another guest? (yes/no): ").strip().lower()
         if add_more != "yes":
@@ -128,14 +137,16 @@ def update_guest():
     db = connect_db()
     cursor = db.cursor()
 
-    custID = input("Enter Customer ID to update: ")
+    custID = input('''
+    Enter Customer ID to update: ''')
 
     query_check = "SELECT * FROM guest WHERE custID = ?"
     cursor.execute(query_check, (custID,))
     guest = cursor.fetchone()
 
     if not guest:
-        print("No guest found with the provided Customer ID.")
+        print('''
+        No guest found with the provided Customer ID.''')
     else:
         print("\nGuest Found:", guest)
         print("Which field do you want to update?")
@@ -181,16 +192,19 @@ def search_guest():
     db = connect_db()
     cursor = db.cursor()
 
-    custID = input("Enter Customer ID to search: ")
+    custID = input('''
+    Enter Customer ID to search: ''')
 
     query = "SELECT * FROM guest WHERE custID = ?"
     cursor.execute(query, (custID,))
     result = cursor.fetchone()
 
     if result:
-        print("Guest Found:", result)
+        print('''
+        Guest Found:    ''', result)
     else:
-        print("No record found.")
+        print('''
+        No record found.''')
 
     cursor.close()
     db.close()
@@ -200,14 +214,16 @@ def delete_guest():
     db = connect_db()
     cursor = db.cursor()
 
-    custID = input("Enter Customer ID to delete: ")
+    custID = input('''
+    Enter Customer ID to delete: ''')
 
     query_check = "SELECT * FROM guest WHERE custID = ?"
     cursor.execute(query_check, (custID,))
     guest = cursor.fetchone()
 
     if not guest:
-        print("No guest found with the provided Customer ID.")
+        print('''
+        No guest found with the provided Customer ID.''')
     else:
         confirmation = input("Are you sure you want to delete this guest? (yes/no): ").strip().lower()
 
@@ -215,9 +231,11 @@ def delete_guest():
             query_delete = "DELETE FROM guest WHERE custID = ?"
             cursor.execute(query_delete, (custID,))
             db.commit()
-            print("Guest record deleted successfully!")
+            print('''
+            Guest record deleted successfully!''')
         else:
-            print("Deletion cancelled.")
+            print('''
+            Deletion cancelled.''')
 
     cursor.close()
     db.close()
@@ -247,7 +265,8 @@ def booking_management():
         elif choice == '5':
             break
         else:
-            print("Invalid choice! Please try again.")
+            print('''
+            Invalid choice! Please try again.''')
 
 
 def add_booking():
@@ -258,11 +277,37 @@ def add_booking():
     custID = input("Enter Customer ID: ")
     room_no = int(input("Enter Room Number: "))
     type_room = input("Enter Room Type: ")
+
+    # Get dates
     checkindate = input("Enter Check-in Date (YYYY-MM-DD): ")
     checkoutdate = input("Enter Check-out Date (YYYY-MM-DD): ")
+
+    # Convert and validate dates
+    try:
+        checkin_obj = datetime.strptime(checkindate, "%Y-%m-%d").date()
+        checkout_obj = datetime.strptime(checkoutdate, "%Y-%m-%d").date()
+    except ValueError:
+        print("Invalid date format. Please use YYYY-MM-DD.")
+        cursor.close()
+        db.close()
+        return
+
+    if checkout_obj <= checkin_obj:
+        print("Check-out date must be after check-in date.")
+        cursor.close()
+        db.close()
+        return
+
+    # Get remaining inputs
     noofguest = int(input("Enter Number of Guests: "))
     amtpernight = float(input("Enter Amount per Night: "))
-    totalamt = float(input("Enter Total Amount: "))
+
+    # Calculate total automatically
+    nights = (checkout_obj - checkin_obj).days
+    totalamt = amtpernight * nights
+
+    print(f"Total Nights: {nights}")
+    print(f"Total Amount: ${totalamt:.2f}")
 
     query = """
     INSERT INTO booking (bookingID, custID, room_no, type, checkindate, checkoutdate, noofguest, amtpernight, totalamt)
@@ -283,14 +328,16 @@ def update_booking():
     db = connect_db()
     cursor = db.cursor()
 
-    bookingID = input("Enter Booking ID to update: ")
+    bookingID = input('''
+    Enter Booking ID to update: ''')
 
     query_check = "SELECT * FROM booking WHERE bookingID = ?"
     cursor.execute(query_check, (bookingID,))
     booking = cursor.fetchone()
 
     if not booking:
-        print("No booking found with the provided Booking ID.")
+        print('''
+        No booking found with the provided Booking ID.''')
     else:
         print("\nBooking Found:", booking)
         print("Which field do you want to update?")
@@ -318,9 +365,11 @@ def update_booking():
             cursor.execute(query_update, (new_value, bookingID))
             db.commit()
 
-            print(f"Booking {field_name} updated successfully!")
+            print(f'''
+            Booking {field_name} updated successfully!''')
         else:
-            print("Invalid choice. No changes were made.")
+            print('''
+            Invalid choice. No changes were made.''')
 
     cursor.close()
     db.close()
@@ -330,16 +379,19 @@ def search_booking():
     db = connect_db()
     cursor = db.cursor()
 
-    bookingID = input("Enter Booking ID to search: ")
+    bookingID = input('''
+    Enter Booking ID to search: ''')
 
     query = "SELECT * FROM booking WHERE bookingID = ?"
     cursor.execute(query, (bookingID,))
     result = cursor.fetchone()
 
     if result:
-        print("Booking Found:", result)
+        print('''
+        Booking Found:''', result)
     else:
-        print("No record found.")
+        print('''
+        No record found.''')
 
     cursor.close()
     db.close()
@@ -356,7 +408,8 @@ def delete_booking():
     booking = cursor.fetchone()
 
     if not booking:
-        print("No booking found with the provided Booking ID.")
+        print('''
+        No booking found with the provided Booking ID.''')
     else:
         confirmation = input("Are you sure you want to delete this booking? (yes/no): ").strip().lower()
 
@@ -364,9 +417,11 @@ def delete_booking():
             query_delete = "DELETE FROM booking WHERE bookingID = ?"
             cursor.execute(query_delete, (bookingID,))
             db.commit()
-            print("Booking record deleted successfully!")
+            print('''
+            Booking record deleted successfully!''')
         else:
-            print("Deletion cancelled.")
+            print('''
+            Deletion cancelled.''')
 
     cursor.close()
     db.close()
@@ -396,7 +451,8 @@ def payment_management():
         elif choice == '5':
             break
         else:
-            print("Invalid choice! Please try again.")
+            print('''
+            Invalid choice! Please try again.''')
 
 
 def add_payment():
@@ -418,7 +474,8 @@ def add_payment():
     cursor.execute(query, data)
     db.commit()
 
-    print("Payment record added successfully!")
+    print('''
+    Payment record added successfully!''')
 
     cursor.close()
     db.close()
@@ -435,7 +492,8 @@ def update_payment():
     payment = cursor.fetchone()
 
     if not payment:
-        print("No payment record found with the provided Bill Number.")
+        print('''
+        No payment record found with the provided Bill Number.''')
     else:
         print("\nPayment Found:", payment)
         print("Which field do you want to update?")
@@ -461,7 +519,8 @@ def update_payment():
 
             print(f"Payment {field_name} updated successfully!")
         else:
-            print("Invalid choice. No changes were made.")
+            print('''
+            Invalid choice. No changes were made.''')
 
     cursor.close()
     db.close()
@@ -478,9 +537,11 @@ def search_payment():
     result = cursor.fetchone()
 
     if result:
-        print("Payment Found:", result)
+        print('''
+        Payment Found:''', result)
     else:
-        print("No payment record found.")
+        print('''
+        No payment record found.''')
 
     cursor.close()
     db.close()
@@ -497,7 +558,8 @@ def delete_payment():
     payment = cursor.fetchone()
 
     if not payment:
-        print("No payment record found with the provided Bill Number.")
+        print('''
+        No payment record found with the provided Bill Number.''')
     else:
         confirmation = input("Are you sure you want to delete this payment record? (yes/no): ").strip().lower()
 
@@ -505,9 +567,11 @@ def delete_payment():
             query_delete = "DELETE FROM payment WHERE bill_no = ?"
             cursor.execute(query_delete, (bill_no,))
             db.commit()
-            print("Payment record deleted successfully!")
+            print('''
+            Payment record deleted successfully!''')
         else:
-            print("Deletion cancelled.")
+            print('''
+            Deletion cancelled.''')
 
     cursor.close()
     db.close()
@@ -535,7 +599,8 @@ def main_menu():
         elif choice == '4':
             dashboard()
         elif choice == '5':
-            print("Exiting the system. Goodbye!")
+            print('''
+            Exiting the system. Goodbye!''')
             break
         else:
             print("Invalid choice! Please try again.")
